@@ -1,2 +1,2 @@
 # APB
-Contains APB design and verification environement
+Contains APB design and verification environment
