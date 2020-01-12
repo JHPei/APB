@@ -1,4 +1,5 @@
 `include "defines.sv"
+`include "functions.sv"
 
 module apb_bridge
        (
@@ -64,7 +65,6 @@ module apb_bridge
          begin
              psel_out_slave[i] <= 'b0;
          end
-         //pwrite_out_slave <= 'b0;
          pwdata_out_slave <= 'b0;
          for(int i=0; i<3; i++)
          begin
@@ -83,7 +83,7 @@ module apb_bridge
          begin
              if(psel[0] && psel[1])
              begin
-                 $display("APB_BRIDGE: WARNING: Cannot select both slaves at once \n");
+                 error_display("BRIDGE","WARNING","Cannot select both slaves at once");
                  next_state = IDLE;    
              end
              if(psel[0] || psel[1])
@@ -92,7 +92,8 @@ module apb_bridge
              end
              else
              begin
-                 $display("APB_BRIDGE: DEBUG: No condition to transition from IDLE to SETUP matches, next_state = IDLE \n");
+                 error_display("BRIDGE","DEBUG","No condition to transition from IDLE to SETUP matches, next_state = IDLE");
+
                  next_state = IDLE;
              end
 
@@ -107,6 +108,11 @@ module apb_bridge
 
          ACCESS:
          begin
+             if(psel[0] && psel[1]) // both slaves are being selected
+             begin
+                error_display("BRIDGE","WARNING","Cannot select both slaves at once");
+                next_state = IDLE;    
+             end
              if(pready)
              begin     //TODO signals that are universally connected to be put in assign statment
                  if(pwrite) // WRITE STATE
@@ -130,10 +136,11 @@ module apb_bridge
              end
              else
              begin
-                 if(psel[0] || psel[1]) // anpther txn is going to take place 
+                 if(psel[0] || psel[1]) // another txn is going to take place 
                  begin
                      next_state = ACCESS;
                  end
+
                  else // no more txns 
                  begin
                      next_state = IDLE;
