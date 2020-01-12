@@ -1,4 +1,5 @@
 `include "defines.sv"
+`include "functions.sv"
 
 module apb_slave
        (
@@ -54,23 +55,23 @@ module apb_slave
          IDLE:
          begin
              pready = 1'b0;
-
              next_state = psel ? SETUP : IDLE;
-         
-             //if(psel)
-             //begin
-             //    next_state = SETUP;
-             //end
-             //else
-             //begin
-             //    next_state = IDLE;
-             //end
          end
 
          SETUP:
          begin
              pready = penable ? 1'b1 : 1'b0;
-             next_state = pready ?(pwrite ? WRITE : READ) : SETUP;
+             if(paddr > `MEM_DEPTH -1)
+             begin
+                 pslverr = 1'b1;
+                 error_display("SLAVE","ERROR","Address out of range");
+                 next_state = SETUP;
+             end
+             else 
+             begin
+                 pslverr = 1'b0;
+                 next_state = pready ?(pwrite ? WRITE : READ) : SETUP;
+             end
 
              //if(pready)
              //begin
