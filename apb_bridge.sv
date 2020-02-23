@@ -81,9 +81,10 @@ module apb_bridge
      case(current_state)
          IDLE:
          begin
-             if(psel[0] && psel[1])
+             // both slaves are being selected
+             if((psel[0] && psel[1]) || (psel[0] =='b0 && psel[1] =='b0))
              begin
-                 error_display("BRIDGE","WARNING","Cannot select both slaves at once");
+                 error_display("BRIDGE","WARNING","Cannot select/unselect both slaves at once");
                  next_state = IDLE;    
              end
              if(psel[0] || psel[1])
@@ -108,9 +109,10 @@ module apb_bridge
 
          ACCESS:
          begin
-             if(psel[0] && psel[1]) // both slaves are being selected
+             // both slaves are being selected
+             if((psel[0] && psel[1]) || (psel[0] =='b0 && psel[1] =='b0))
              begin
-                error_display("BRIDGE","WARNING","Cannot select both slaves at once");
+                error_display("BRIDGE","WARNING","Cannot select/unselect both slaves at once");
                 next_state = IDLE;    
              end
              if(pready)
@@ -150,3 +152,4 @@ module apb_bridge
      endcase
  end
 endmodule
+
